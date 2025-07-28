@@ -17,30 +17,30 @@ interface SimpleContentCardProps {
 
 const getCategoryColor = (category: string): string => {
   const categoryColors: Record<string, string> = {
-    "Development": "bg-category-development text-white",
-    "Work": "bg-category-work text-white", 
-    "Design": "bg-category-design text-white",
-    "Research": "bg-category-research text-white",
-    "Personal": "bg-category-personal text-white",
-    "Productivity": "bg-category-productivity text-white",
-    "Learning": "bg-category-learning text-white",
-    "Health": "bg-category-health text-white",
+    "Development": "bg-gradient-category-development",
+    "Work": "bg-gradient-category-work",
+    "Design": "bg-gradient-category-design",
+    "Research": "bg-gradient-category-research",
+    "Personal": "bg-gradient-category-personal",
+    "Productivity": "bg-gradient-category-productivity",
+    "Learning": "bg-gradient-category-learning",
+    "Health": "bg-gradient-category-health",
   };
   
-  return categoryColors[category] || "bg-muted text-muted-foreground";
+  return categoryColors[category] || "bg-muted";
 };
 
 const SimpleContentCard = ({ item, className }: SimpleContentCardProps) => {
   return (
     <Card className={cn(
-      "group hover:shadow-medium transition-all duration-200 cursor-pointer bg-gradient-card border-0 shadow-soft",
+      "group transition-all duration-300 ease-in-out cursor-pointer bg-white/10 dark:bg-black/10 backdrop-blur-lg border border-white/20 dark:border-black/20 shadow-lg hover:shadow-xl hover:border-white/30 dark:hover:border-black/30",
       className
     )}>
       <CardContent className="p-5">
         <div className="flex items-start justify-between mb-3">
           <Badge 
             className={cn(
-              "text-xs font-medium px-2 py-1 rounded-full border-0",
+              "text-xs font-bold text-white px-3 py-1.5 rounded-lg border-0 shadow-md",
               getCategoryColor(item.category)
             )}
           >

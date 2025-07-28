@@ -2,6 +2,7 @@ import { useState } from "react";
 import { AI_Prompt } from "@/components/ui/animated-ai-input";
 import SimpleContentCard from "@/components/content/SimpleContentCard";
 import { useToast } from "@/hooks/use-toast";
+import { processContentWithGemini } from "@/lib/gemini";
 
 const Home = () => {
   const { toast } = useToast();
@@ -38,54 +39,32 @@ const Home = () => {
     },
   ]);
 
-  const handleSaveContent = (message: string, type: string) => {
+  const handleSaveContent = async (message: string, type: string) => {
     console.log('Saving content:', { message, type });
     
+    const analysis = await processContentWithGemini(message);
+    
     toast({
-      title: "Content saved successfully!",
-      description: `Your ${type} content is being analyzed and will appear in your dashboard shortly.`,
+      title: "Content saved and analyzed!",
+      description: analysis,
     });
   };
 
   return (
-    <div className="flex-1 overflow-auto bg-gradient-hero min-h-screen">
-      {/* Hero Section with Save Box */}
-      <div className="px-8 py-16">
-        <div className="max-w-4xl mx-auto text-center">
-          {/* Logo */}
-          <div className="flex justify-center">
-            <div className="w-48 h-48 rounded-2xl flex items-center justify-center">
-              <img src="/images/logo.svg" alt="HyperSave Logo" className="w-44 h-44" />
-            </div>
+    <div className="flex-1 flex flex-col items-center justify-center bg-gradient-hero min-h-screen p-4">
+      <div className="w-full max-w-xl flex flex-col -mt-44">
+        {/* Logo */}
+        <div className="flex justify-center pt-4">
+          <div className="w-48 h-48 rounded-2xl flex items-center justify-center">
+            <img src="/images/logo.svg" alt="HyperSave Logo" className="w-44 h-44" />
           </div>
         </div>
         
         {/* New Prompt Box */}
-        <div className="max-w-2xl mx-auto -mt-8">
+        <div className="-mt-16">
           <AI_Prompt onSubmit={handleSaveContent} />
         </div>
       </div>
-
-      {/* Recent Activity Section */}
-      {recentContent.length > 0 && (
-        <div className="px-8 pb-16">
-          <div className="max-w-6xl mx-auto">
-            <div className="mb-8">
-              <h2 className="text-2xl font-semibold text-foreground mb-2">Recent Activity</h2>
-              <p className="text-muted-foreground">Your latest analyzed content</p>
-            </div>
-
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-              {recentContent.map((item) => (
-                <SimpleContentCard
-                  key={item.id}
-                  item={item}
-                />
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

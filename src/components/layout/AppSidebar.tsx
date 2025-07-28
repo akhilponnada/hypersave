@@ -119,14 +119,6 @@ export function AppSidebar({ activeSection, onSectionChange }: AppSidebarProps) 
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* Footer */}
-        {!isCollapsed && (
-          <div className="mt-auto p-6 border-t border-border/30">
-            <div className="text-xs text-muted-foreground">
-              <p>Made with 💜 for productivity</p>
-            </div>
-          </div>
-        )}
       </SidebarContent>
     </Sidebar>
   );

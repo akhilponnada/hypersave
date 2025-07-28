@@ -187,98 +187,103 @@ export function AI_Prompt({ onSubmit, placeholder = "Save anything - text, links
     };
 
     return (
-        <div className="w-full py-4">
-            <div className="bg-black/5 dark:bg-black/10 rounded-2xl p-1.5">
-                <div className="relative">
-                    <div className="relative flex flex-col">
-                        <div
-                            className="overflow-y-auto"
-                            style={{ maxHeight: "400px" }}
-                        >
-                            <Textarea
-                                id="ai-input-15"
-                                value={value}
-                                placeholder={placeholder}
-                                className={cn(
-                                    "w-full rounded-xl rounded-b-none px-4 py-3 bg-transparent border-none text-black dark:text-white placeholder:text-black/70 dark:placeholder:text-white/70 resize-none focus-visible:ring-0 focus-visible:ring-offset-0",
-                                    "min-h-[72px]"
-                                )}
-                                ref={textareaRef}
-                                onKeyDown={handleKeyDown}
-                                onChange={(e) => {
-                                    setValue(e.target.value);
-                                    adjustHeight();
-                                }}
-                            />
-                        </div>
-
-                        <div className="h-14 rounded-b-xl flex items-center">
-                            <div className="absolute left-3 right-3 bottom-3 flex items-center justify-between w-[calc(100%-24px)]">
-                                <div className="flex items-center gap-2">
-                                    {/* Attach Button */}
-                                    <button
-                                        type="button"
-                                        className="p-2 rounded-lg transition-all duration-200 shrink-0 text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white focus-visible:ring-2 focus-visible:ring-offset-0 focus-visible:ring-blue-500"
-                                    >
-                                        <Paperclip className="w-4 h-4" />
-                                    </button>
-                                    {/* Voice Recording Button */}
-                                    <button
-                                        type="button"
-                                        className={cn(
-                                            "p-2 rounded-lg transition-all duration-200 shrink-0 focus-visible:ring-2 focus-visible:ring-offset-0 focus-visible:ring-blue-500",
-                                            isRecording
-                                                ? "text-white shadow-lg"
-                                                : "text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white"
-                                        )}
-                                        style={isRecording ? { backgroundColor: '#3492ff' } : {}}
-                                        onClick={handleVoiceRecord}
-                                    >
-                                        <motion.div
-                                            animate={isRecording ? { scale: [1, 1.1, 1] } : { scale: 1 }}
-                                            transition={{ repeat: isRecording ? Infinity : 0, duration: 1 }}
-                                        >
-                                            <Mic className="w-4 h-4" />
-                                        </motion.div>
-                                    </button>
-                                </div>
-                                
-                                <div className="flex items-center gap-2">
-                                    {/* Content Type Tag - positioned to the left of send button */}
-                                    {value.trim() && (
-                                        <motion.div
-                                            initial={{ opacity: 0, scale: 0.8 }}
-                                            animate={{ opacity: 1, scale: 1 }}
-                                            className="px-3 py-1.5 rounded-lg text-white text-xs font-semibold tracking-wide shadow-lg"
-                                            style={{ backgroundColor: '#3492ff' }}
-                                        >
-                                            {detectedContent.label}
-                                        </motion.div>
+        <>
+            <div className="w-full py-4">
+                <div className="bg-black/5 dark:bg-black/10 rounded-2xl p-1.5">
+                    <div className="relative">
+                        <div className="relative flex flex-col">
+                            <div
+                                className="overflow-y-auto"
+                                style={{ maxHeight: "400px" }}
+                            >
+                                <Textarea
+                                    id="ai-input-15"
+                                    value={value}
+                                    placeholder={placeholder}
+                                    className={cn(
+                                        "w-full rounded-xl rounded-b-none px-4 py-3 bg-transparent border-none text-black dark:text-white placeholder:text-black/70 dark:placeholder:text-white/70 resize-none focus-visible:ring-0 focus-visible:ring-offset-0",
+                                        "min-h-[72px]"
                                     )}
-                                    
-                                    <button
-                                        type="button"
-                                        className="rounded-lg p-2 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-offset-0 focus-visible:ring-blue-500"
-                                        style={{ backgroundColor: '#3492ff' }}
-                                        aria-label="Send message"
-                                        disabled={!value.trim()}
-                                        onClick={handleSubmit}
-                                    >
-                                        <ArrowRight
+                                    ref={textareaRef}
+                                    onKeyDown={handleKeyDown}
+                                    onChange={(e) => {
+                                        setValue(e.target.value);
+                                        adjustHeight();
+                                    }}
+                                />
+                            </div>
+
+                            <div className="h-14 rounded-b-xl flex items-center">
+                                <div className="absolute left-3 right-3 bottom-3 flex items-center justify-between w-[calc(100%-24px)]">
+                                    <div className="flex items-center gap-2">
+                                        {/* Attach Button */}
+                                        <button
+                                            type="button"
+                                            className="p-2 rounded-lg transition-all duration-200 shrink-0 text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white focus-visible:ring-2 focus-visible:ring-offset-0 focus-visible:ring-blue-500 border border-border"
+                                        >
+                                            <Paperclip className="w-4 h-4" />
+                                        </button>
+                                        {/* Voice Recording Button */}
+                                        <motion.button
+                                            type="button"
+                                            animate={{ width: isRecording ? '100px' : '36px' }}
+                                            transition={{ duration: 0.2, ease: "easeInOut" }}
                                             className={cn(
-                                                "w-4 h-4 text-white transition-opacity duration-200",
-                                                value.trim()
-                                                    ? "opacity-100"
-                                                    : "opacity-50"
+                                                "flex items-center justify-center p-2 rounded-lg shrink-0 focus-visible:ring-2 focus-visible:ring-offset-0 focus-visible:ring-blue-500 border border-border overflow-hidden",
+                                                isRecording
+                                                    ? "text-white bg-blue-500"
+                                                    : "text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white"
                                             )}
-                                        />
-                                    </button>
+                                            onClick={handleVoiceRecord}
+                                        >
+                                            <Mic className="w-4 h-4 shrink-0" />
+                                            {isRecording && <span className="ml-2 text-xs whitespace-nowrap">Recording</span>}
+                                        </motion.button>
+                                    </div>
+                                    
+                                    <div className="flex items-center gap-2">
+                                        {/* Content Type Tag - positioned to the left of send button */}
+                                        {value.trim() && (
+                                            <motion.div
+                                                initial={{ opacity: 0, scale: 0.8 }}
+                                                animate={{ opacity: 1, scale: 1 }}
+                                                className="px-3 py-1.5 rounded-lg text-send-icon-blue text-xs font-semibold tracking-wide border border-send-icon-blue/20"
+                                                style={{ backgroundColor: 'hsla(var(--send-icon-blue), 0.1)' }}
+                                            >
+                                                {detectedContent.label}
+                                            </motion.div>
+                                        )}
+                                        
+                                        <button
+                                            type="button"
+                                            className="rounded-lg p-2 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-offset-0 focus-visible:ring-blue-500"
+                                            style={{ backgroundColor: '#3492ff' }}
+                                            aria-label="Send message"
+                                            disabled={!value.trim()}
+                                            onClick={handleSubmit}
+                                        >
+                                            <ArrowRight
+                                                className={cn(
+                                                    "w-4 h-4 text-white transition-opacity duration-200",
+                                                    value.trim()
+                                                        ? "opacity-100"
+                                                        : "opacity-50"
+                                                )}
+                                            />
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
+            <div className="flex items-center justify-center gap-2 -mt-2">
+                <span className="text-xs text-muted-foreground">Frequent:</span>
+                <Button variant="outline" size="sm" className="h-6 px-2 text-xs rounded-md">Work</Button>
+                <Button variant="outline" size="sm" className="h-6 px-2 text-xs rounded-md">Personal</Button>
+                <Button variant="outline" size="sm" className="h-6 px-2 text-xs rounded-md">Ideas</Button>
+            </div>
+        </>
     );
 }
