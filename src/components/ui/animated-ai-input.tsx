@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight, Mic, Paperclip, Type, Link, Image, Play, Hash } from "lucide-react";
+import { ArrowRight, Mic, Paperclip, Type, Link, Image, Play, Hash, X } from "lucide-react";
 import { useState, useRef, useCallback, useEffect } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
@@ -139,32 +139,25 @@ const detectContentType = (content: string): ContentType => {
     };
 };
 
+import { useContent } from "@/contexts/ContentContext";
+
 interface AI_PromptProps {
-    onSubmit?: (message: string, type: string) => void;
     placeholder?: string;
 }
 
-export function AI_Prompt({ onSubmit, placeholder = "Save anything - text, links, files, thoughts..." }: AI_PromptProps) {
+export function AI_Prompt({ placeholder = "Save anything - text, links, files, thoughts..." }: AI_PromptProps) {
     const [value, setValue] = useState("");
+    const [files, setFiles] = useState<File[]>([]);
     const [isRecording, setIsRecording] = useState(false);
-    const [detectedContent, setDetectedContent] = useState<ContentType>({ 
-        type: 'text', 
-        label: 'TEXT',
-        bgColor: 'bg-gray-500'
-    });
+    const [isProcessing, setIsProcessing] = useState(false);
+    const { addContent } = useContent();
+    
+    const detectedContent = detectContentType(value);
     
     const { textareaRef, adjustHeight } = useAutoResizeTextarea({
         minHeight: 72,
         maxHeight: 300,
     });
-
-    useEffect(() => {
-        if (value.trim()) {
-            setDetectedContent(detectContentType(value));
-        } else {
-            setDetectedContent({ type: 'text', label: 'TEXT', bgColor: 'bg-gray-500' });
-        }
-    }, [value]);
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
         if (e.key === "Enter" && !e.shiftKey && value.trim()) {
@@ -173,17 +166,82 @@ export function AI_Prompt({ onSubmit, placeholder = "Save anything - text, links
         }
     };
 
-    const handleSubmit = () => {
-        if (!value.trim()) return;
-        
-        onSubmit?.(value, detectedContent.type);
+    const handleSubmit = async () => {
+        if ((!value.trim() && files.length === 0) || isProcessing) return;
+
+        setIsProcessing(true);
+
+        const textFiles = files.filter(file => file.type.startsWith('text/'));
+        const imageFiles = files.filter(file => file.type.startsWith('image/'));
+
+        let combinedContent = value;
+
+        if (textFiles.length > 0) {
+            const fileContents = await Promise.all(
+                textFiles.map(file => {
+                    return new Promise<string>((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.onload = (event) => {
+                            resolve(event.target?.result as string);
+                        };
+                        reader.onerror = (error) => {
+                            reject(error);
+                        };
+                        reader.readAsText(file);
+                    });
+                })
+            );
+            combinedContent = value + "\n\n" + fileContents.join("\n\n--- (New File) ---\n\n");
+        }
+
+        const images = await Promise.all(
+            imageFiles.map(file => {
+                return new Promise<{mimeType: string, data: string}>((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        const result = (event.target?.result as string);
+                        const base64 = result.split(',')[1];
+                        resolve({mimeType: file.type, data: base64});
+                    };
+                    reader.onerror = (error) => {
+                        reject(error);
+                    };
+                    reader.readAsDataURL(file);
+                });
+            })
+        );
+
+        const detectedType = detectContentType(combinedContent);
+
+        await addContent({
+            title: combinedContent.slice(0, 50), // Temporary title
+            content: combinedContent,
+            images: images,
+            type: files.length > 0 ? 'file' : detectedType.type as 'text' | 'link' | 'file',
+            category: "Uncategorized",
+            tags: [],
+        });
+
         setValue("");
+        setFiles([]);
         adjustHeight(true);
+        setIsProcessing(false);
     };
 
     const handleVoiceRecord = () => {
         setIsRecording(!isRecording);
         console.log('Voice recording:', isRecording ? 'stopped' : 'started');
+    };
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const selectedFiles = e.target.files;
+        if (selectedFiles) {
+            const newFiles = Array.from(selectedFiles);
+            setFiles(prevFiles => {
+                const combined = [...prevFiles, ...newFiles];
+                return combined.slice(0, 3); // Limit to 3 files
+            });
+        }
     };
 
     return (
@@ -217,12 +275,10 @@ export function AI_Prompt({ onSubmit, placeholder = "Save anything - text, links
                                 <div className="absolute left-3 right-3 bottom-3 flex items-center justify-between w-[calc(100%-24px)]">
                                     <div className="flex items-center gap-2">
                                         {/* Attach Button */}
-                                        <button
-                                            type="button"
-                                            className="p-2 rounded-lg transition-all duration-200 shrink-0 text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white focus-visible:ring-2 focus-visible:ring-offset-0 focus-visible:ring-blue-500 border border-border"
-                                        >
+                                        <label className="p-2 rounded-lg transition-all duration-200 shrink-0 text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white focus-visible:ring-2 focus-visible:ring-offset-0 focus-visible:ring-blue-500 border border-border cursor-pointer">
+                                            <input type="file" multiple className="hidden" onChange={handleFileChange} />
                                             <Paperclip className="w-4 h-4" />
-                                        </button>
+                                        </label>
                                         {/* Voice Recording Button */}
                                         <motion.button
                                             type="button"
@@ -239,6 +295,16 @@ export function AI_Prompt({ onSubmit, placeholder = "Save anything - text, links
                                             <Mic className="w-4 h-4 shrink-0" />
                                             {isRecording && <span className="ml-2 text-xs whitespace-nowrap">Recording</span>}
                                         </motion.button>
+                                        <div className="flex items-center gap-1">
+                                           {files.map((file, index) => (
+                                               <div key={index} className="text-xs bg-gray-200 dark:bg-gray-700 rounded-lg px-2 py-1 flex items-center border border-border">
+                                                   <span>{file.name.substring(0, 5)}...</span>
+                                                   <button onClick={() => setFiles(files.filter(f => f !== file))} className="ml-1 text-red-500">
+                                                       <X className="w-3 h-3" />
+                                                   </button>
+                                               </div>
+                                           ))}
+                                       </div>
                                     </div>
                                     
                                     <div className="flex items-center gap-2">
@@ -259,15 +325,15 @@ export function AI_Prompt({ onSubmit, placeholder = "Save anything - text, links
                                             className="rounded-lg p-2 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-offset-0 focus-visible:ring-blue-500"
                                             style={{ backgroundColor: '#3492ff' }}
                                             aria-label="Send message"
-                                            disabled={!value.trim()}
+                                            disabled={(!value.trim() && files.length === 0) || isProcessing}
                                             onClick={handleSubmit}
                                         >
                                             <ArrowRight
                                                 className={cn(
                                                     "w-4 h-4 text-white transition-opacity duration-200",
-                                                    value.trim()
-                                                        ? "opacity-100"
-                                                        : "opacity-50"
+                                                    (!value.trim() && files.length === 0)
+                                                        ? "opacity-50"
+                                                        : "opacity-100"
                                                 )}
                                             />
                                         </button>

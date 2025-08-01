@@ -1,4 +1,5 @@
-import { Home, Search, Archive, Bookmark, Tag, Bot } from "lucide-react";
+import { Home, Search, Archive, Bookmark, Tag, Clock } from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
 import {
   Sidebar,
   SidebarContent,
@@ -13,25 +14,29 @@ import {
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 
-interface AppSidebarProps {
-  activeSection: string;
-  onSectionChange: (section: string) => void;
-}
-
 const navigationItems = [
-  { id: "home", label: "Home", icon: Home },
-  { id: "library", label: "Library", icon: Archive },
-  { id: "search", label: "Search", icon: Search },
+  { id: "home", path: "/", label: "Home", icon: Home },
+  { id: "library", path: "/library", label: "Library", icon: Archive },
+  { id: "search", path: "/search", label: "Search", icon: Search },
+  { id: "queue", path: "/queue", label: "Queue", icon: Clock },
 ];
 
 const libraryItems = [
-  { id: "favorites", label: "Favorites", icon: Bookmark },
-  { id: "tags", label: "Tags", icon: Tag },
+  { id: "favorites", path: "/favorites", label: "Favorites", icon: Bookmark },
+  { id: "tags", path: "/tags", label: "Tags", icon: Tag },
 ];
 
-export function AppSidebar({ activeSection, onSectionChange }: AppSidebarProps) {
+export function AppSidebar() {
   const { state } = useSidebar();
   const isCollapsed = state === "collapsed";
+  const location = useLocation();
+
+  const isActive = (path: string) => {
+    if (path === "/") {
+      return location.pathname === "/";
+    }
+    return location.pathname.startsWith(path);
+  };
 
   return (
     <Sidebar className="border-r border-border/50" collapsible="icon">
@@ -64,22 +69,22 @@ export function AppSidebar({ activeSection, onSectionChange }: AppSidebarProps) 
             <SidebarMenu>
               {navigationItems.map((item) => {
                 const Icon = item.icon;
-                const isActive = activeSection === item.id;
                 
                 return (
                   <SidebarMenuItem key={item.id}>
-                    <SidebarMenuButton
-                      onClick={() => onSectionChange(item.id)}
-                      className={cn(
-                        "h-11 rounded-xl transition-all duration-200",
-                        isActive 
-                          ? "bg-send-icon-blue/10 text-send-icon-blue border border-send-icon-blue/20"
-                          : "hover:bg-accent/50 text-muted-foreground hover:text-foreground"
-                      )}
-                    >
-                      <Icon className="w-5 h-5" />
-                      {!isCollapsed && <span className="font-medium">{item.label}</span>}
-                    </SidebarMenuButton>
+                    <Link to={item.path}>
+                      <SidebarMenuButton
+                        className={cn(
+                          "h-11 rounded-xl transition-all duration-200",
+                          isActive(item.path)
+                            ? "bg-send-icon-blue/10 text-send-icon-blue border border-send-icon-blue/20"
+                            : "hover:bg-accent/50 text-muted-foreground hover:text-foreground"
+                        )}
+                      >
+                        <Icon className="w-5 h-5" />
+                        {!isCollapsed && <span className="font-medium">{item.label}</span>}
+                      </SidebarMenuButton>
+                    </Link>
                   </SidebarMenuItem>
                 );
               })}
@@ -96,22 +101,22 @@ export function AppSidebar({ activeSection, onSectionChange }: AppSidebarProps) 
             <SidebarMenu>
               {libraryItems.map((item) => {
                 const Icon = item.icon;
-                const isActive = activeSection === item.id;
                 
                 return (
                   <SidebarMenuItem key={item.id}>
-                    <SidebarMenuButton
-                      onClick={() => onSectionChange(item.id)}
-                      className={cn(
-                        "h-10 rounded-xl transition-all duration-200",
-                        isActive 
-                          ? "bg-send-icon-blue/10 text-send-icon-blue border border-send-icon-blue/20"
-                          : "hover:bg-accent/50 text-muted-foreground hover:text-foreground"
-                      )}
-                    >
-                      <Icon className="w-4 h-4" />
-                      {!isCollapsed && <span>{item.label}</span>}
-                    </SidebarMenuButton>
+                    <Link to={item.path}>
+                      <SidebarMenuButton
+                        className={cn(
+                          "h-10 rounded-xl transition-all duration-200",
+                          isActive(item.path)
+                            ? "bg-send-icon-blue/10 text-send-icon-blue border border-send-icon-blue/20"
+                            : "hover:bg-accent/50 text-muted-foreground hover:text-foreground"
+                        )}
+                      >
+                        <Icon className="w-4 h-4" />
+                        {!isCollapsed && <span>{item.label}</span>}
+                      </SidebarMenuButton>
+                    </Link>
                   </SidebarMenuItem>
                 );
               })}

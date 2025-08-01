@@ -1,7 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { ExternalLink, FileText, Link as LinkIcon, MoreHorizontal, Calendar } from "lucide-react";
+import { ExternalLink, FileText, MoreHorizontal, Calendar } from "lucide-react";
+import { IoLink } from "react-icons/io5";
+import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
 interface ContentItem {
@@ -25,7 +27,7 @@ const ContentCard = ({ item, variant = 'analyzed', onViewDetails }: ContentCardP
   const getTypeIcon = () => {
     switch (item.type) {
       case 'link':
-        return LinkIcon;
+        return IoLink;
       case 'file':
         return FileText;
       default:
@@ -90,14 +92,15 @@ const ContentCard = ({ item, variant = 'analyzed', onViewDetails }: ContentCardP
                 Open
               </Button>
             )}
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground hover:bg-black/5 dark:hover:bg-white/10 rounded-md"
-              onClick={() => onViewDetails?.(item.id)}
-            >
-              View Details
-            </Button>
+            <Link to={`/library/${item.id}`}>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground hover:bg-black/5 dark:hover:bg-white/10 rounded-md"
+              >
+                View Details
+              </Button>
+            </Link>
           </div>
         </div>
       </CardFooter>
