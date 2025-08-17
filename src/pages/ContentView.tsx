@@ -109,9 +109,9 @@ const ContentView = () => {
         >
             <div className="flex items-center gap-3 mb-6">
                 {icon}
-                <h2 className="text-2xl font-bold text-gray-800">{title}</h2>
+                <h2 className="text-xl font-semibold">{title}</h2>
             </div>
-            <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed">
+            <div className="text-base">
                 {children}
             </div>
         </motion.div>
@@ -124,194 +124,154 @@ const ContentView = () => {
             exit="out"
             variants={pageVariants}
             transition={pageTransition}
-            className="absolute inset-0 bg-gray-50 z-50"
+            className="absolute inset-0 bg-background text-foreground z-50"
         >
             <div className="h-full w-full overflow-y-auto">
                 <Button
-                  variant="outline"
+                  variant="ghost"
                   onClick={() => navigate("/library")}
-                  className="absolute top-6 right-6 z-20 h-8 w-8 rounded-lg bg-transparent border-gray-300 text-gray-500 shrink-0 flex items-center justify-center hover:bg-blue-500 hover:text-white hover:border-blue-500 transition-all p-0"
+                  className="absolute top-6 right-6 z-20 h-8 w-8 rounded-lg bg-black/10 dark:bg-white/10 shrink-0 flex items-center justify-center hover:bg-black/20 dark:hover:bg-white/20 transition-all p-0"
                 >
-                  <X className="w-4 h-4" />
+                  <X className="w-5 h-5" />
                 </Button>
 
                 {loading ? <ContentSkeleton /> : (
-                    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-                        <div className="grid grid-cols-12 gap-x-12">
-                            {/* Main Content */}
-                            <div className="col-span-12 lg:col-span-8">
-                                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease: "easeOut" }}>
-                                    <h1 className="text-4xl md:text-5xl font-bold text-gray-900 tracking-tight leading-tight mb-4">
+                    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-24 grid grid-cols-12 gap-8">
+                        <div className="col-span-12 lg:col-span-8">
+                            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease: "easeOut" }}>
+                                <div className="mb-12">
+                                    <h1 className="text-4xl font-bold tracking-tight mb-4">
                                         {analysis?.title || item.title}
                                     </h1>
-                                    <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-gray-500 mb-8">
-                                        <div className="flex items-center gap-2">
-                                            <Calendar className="w-4 h-4" />
-                                            <span>{new Date(item.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
-                                        </div>
-                                        <Separator orientation="vertical" className="h-4" />
-                                        <div className="flex items-center gap-2">
-                                            {getIconForItemType(item.type)}
-                                            <span className="capitalize">{item.type}</span>
-                                        </div>
-                                        <Separator orientation="vertical" className="h-4" />
-                                        <div className="flex items-center gap-2">
-                                            <Tag className="w-4 h-4" />
-                                            <span>{item.category}</span>
-                                        </div>
+                                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                                        <span>{new Date(item.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}</span>
+                                        <span className="capitalize">{item.category}</span>
                                     </div>
-                                </motion.div>
+                                </div>
+                            </motion.div>
 
-                                <div className="space-y-6">
-                                    <Section title="Summary" icon={<Lightbulb className="w-6 h-6 text-yellow-500" />}>
-                                        {analysis?.summary ? (
-                                            <p>{analysis.summary}</p>
-                                        ) : (
-                                            <EmptyState icon={<Lightbulb className="w-6 h-6 text-yellow-400" />} title="No Summary Available" message="The AI couldn't generate a summary for this content." />
-                                        )}
+                            <div className="space-y-12">
+                                <Section title="Summary" icon={<Lightbulb className="w-6 h-6 text-yellow-400" />}>
+                                    {analysis?.summary ? (
+                                        <p className="text-lg leading-relaxed">{analysis.summary}</p>
+                                    ) : (
+                                        <EmptyState icon={<Lightbulb className="w-6 h-6 text-yellow-400" />} title="No Summary Available" message="The AI couldn't generate a summary for this content." />
+                                    )}
+                                </Section>
+
+                                {analysis?.keyPoints && analysis.keyPoints.length > 0 && (
+                                   <Section title="Key Points" icon={<CheckCircle2 className="w-6 h-6 text-green-400" />}>
+                                        <ul className="space-y-4">
+                                            {analysis.keyPoints.map((point, index) => (
+                                                <li key={index} className="flex items-start gap-3">
+                                                    <CheckCircle2 className="w-5 h-5 text-green-400 mt-1 shrink-0" />
+                                                    <span>{point}</span>
+                                                </li>
+                                            ))}
+                                        </ul>
                                     </Section>
+                                )}
 
-                                    {analysis?.keyPoints && analysis.keyPoints.length > 0 && (
-                                       <Section title="Key Points" icon={<CheckCircle2 className="w-6 h-6 text-green-500" />}>
-                                            <ul className="space-y-3 list-disc list-inside">
-                                                {analysis.keyPoints.map((point, index) => (
-                                                    <li key={index} className="pl-2">{point}</li>
-                                                ))}
-                                            </ul>
-                                        </Section>
-                                    )}
+                                {analysis?.visualization.shouldVisualize && (
+                                    <Section title="Data Visualization" icon={<BarChart2 className="w-6 h-6 text-indigo-400" />}>
+                                        <div className="h-96 w-full bg-black/10 p-4 rounded-xl border border-white/10">
+                                            <ResponsiveContainer width="100%" height="100%">
+                                                <BarChart data={analysis.visualization.data} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
+                                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.1)" />
+                                                    <XAxis dataKey="label" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={{ stroke: "hsl(var(--border))" }} />
+                                                    <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={{ stroke: "hsl(var(--border))" }} tickFormatter={(value) => `$${value}`} />
+                                                    <Tooltip
+                                                        cursor={{ fill: 'rgba(129, 140, 248, 0.1)' }}
+                                                        contentStyle={{
+                                                            background: 'hsl(var(--background))',
+                                                            borderColor: 'hsl(var(--border))',
+                                                            borderRadius: '0.75rem',
+                                                            boxShadow: '0 8px 24px -8px rgba(0,0,0,0.2)',
+                                                        }}
+                                                        labelStyle={{ fontWeight: 'bold', color: 'hsl(var(--foreground))' }}
+                                                    />
+                                                    <Bar dataKey="value" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                                                </BarChart>
+                                            </ResponsiveContainer>
+                                        </div>
+                                    </Section>
+                                )}
 
-                                    {analysis?.visualization.shouldVisualize && (
-                                        <Section title="Data Visualization" icon={<BarChart2 className="w-6 h-6 text-green-500" />}>
-                                            <div className="h-96 w-full bg-gray-100/50 p-4 rounded-lg border border-gray-200/80">
-                                                <ResponsiveContainer width="100%" height="100%">
-                                                    <BarChart data={analysis.visualization.data} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
-                                                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(0,0,0,0.05)" />
-                                                        <XAxis dataKey="label" stroke="#6b7280" fontSize={12} tickLine={false} axisLine={{ stroke: "#d1d5db" }} />
-                                                        <YAxis stroke="#6b7280" fontSize={12} tickLine={false} axisLine={{ stroke: "#d1d5db" }} tickFormatter={(value) => `$${value}`} />
-                                                        <Tooltip
-                                                            cursor={{ fill: 'rgba(52, 211, 153, 0.1)' }}
-                                                            contentStyle={{
-                                                                background: 'white',
-                                                                borderColor: '#e5e7eb',
-                                                                borderRadius: '0.5rem',
-                                                                boxShadow: '0 4px 12px -4px rgba(0,0,0,0.1)',
-                                                            }}
-                                                            labelStyle={{ fontWeight: 'bold', color: '#1f2937' }}
-                                                        />
-                                                        <Bar dataKey="value" fill="#34d399" radius={[4, 4, 0, 0]} />
-                                                    </BarChart>
-                                                </ResponsiveContainer>
+                                <Section title="Original Content" icon={<FileText className="w-6 h-6 text-sky-400" />}>
+                                    {isLink && url && (
+                                        <a href={url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-4 p-4 bg-black/10 border border-white/10 rounded-xl mb-6 hover:bg-black/20 transition-colors">
+                                            <Link className="w-5 h-5 text-sky-400" />
+                                            <div className="flex-grow">
+                                                <p className="font-semibold text-sky-300">Source Link</p>
+                                                <p className="text-sm text-muted-foreground truncate">{url}</p>
                                             </div>
-                                        </Section>
+                                            <ExternalLink className="w-4 h-4 text-muted-foreground" />
+                                        </a>
                                     )}
-
-                                    <Section title="Original Content" icon={<FileText className="w-6 h-6 text-blue-500" />}>
-                                        {isLink && url && (
-                                            <a href={url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-4 bg-blue-50 border border-blue-200 rounded-lg mb-6 hover:bg-blue-100 transition-colors">
-                                                <IoLink className="w-5 h-5 text-blue-600" />
-                                                <div>
-                                                    <p className="font-semibold text-blue-700">Source Link</p>
-                                                    <p className="text-sm text-blue-600 truncate">{url}</p>
-                                                </div>
-                                                <ExternalLink className="w-4 h-4 text-blue-500 ml-auto" />
-                                            </a>
-                                        )}
+                                    <div className="prose prose-invert max-w-none prose-p:text-muted-foreground prose-headings:text-foreground">
                                         <p className="whitespace-pre-wrap">
                                             {originalText}
                                         </p>
-                                        {item.images && item.images.length > 0 && (
-                                           <div className="mt-6 grid grid-cols-2 gap-4">
-                                               {item.images.map((image, index) => (
-                                                   <img key={index} src={`data:${image.mimeType};base64,${image.data}`} alt={`Uploaded content ${index + 1}`} className="rounded-lg" />
-                                               ))}
-                                           </div>
-                                        )}
-                                    </Section>
-                                </div>
-                            </div>
-
-                            {/* Sidebar */}
-                            <div className="col-span-12 lg:col-span-4">
-                                <div className="sticky top-24 space-y-6">
-                                    <div className="bg-white rounded-xl border border-gray-200/80 shadow-sm">
-                                        <div className="p-5 border-b border-gray-200/80">
-                                            <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2.5"><Info className="w-5 h-5 text-gray-500" /> Details</h3>
-                                        </div>
-                                        <div className="p-5 space-y-4 text-sm">
-                                            <div className="flex justify-between items-center">
-                                                <span className="text-gray-500">Type</span>
-                                                <span className="font-medium text-gray-700 capitalize">{item.type}</span>
-                                            </div>
-                                            <div className="flex justify-between items-center">
-                                                <span className="text-gray-500">Category</span>
-                                                <Badge variant="secondary">{item.category}</Badge>
-                                            </div>
-                                            <div className="flex justify-between items-center">
-                                                <span className="text-gray-500">Created</span>
-                                                <span className="font-medium text-gray-700">{new Date(item.createdAt).toLocaleDateString()}</span>
-                                            </div>
-                                            <Separator />
-                                            <div className="flex justify-between items-center">
-                                                <span className="text-gray-500">AI Status</span>
-                                                <span className="font-medium text-gray-700 flex items-center gap-1.5">
-                                                    {analysis ? (
-                                                        <>
-                                                            <CheckCircle2 className="w-4 h-4 text-green-500" />
-                                                            Completed
-                                                        </>
-                                                    ) : (
-                                                        <>
-                                                            <Loader2 className="w-4 h-4 text-amber-500 animate-spin" />
-                                                            Processing
-                                                        </>
-                                                    )}
-                                                </span>
-                                            </div>
-                                            <div className="flex justify-between items-center">
-                                                <span className="text-gray-500">Insights</span>
-                                                <span className="font-medium text-gray-700">{analysis?.keyPoints?.length || 0} found</span>
-                                            </div>
-                                            <div className="flex justify-between items-center">
-                                                <span className="text-gray-500">Visualization</span>
-                                                <span className="font-medium text-gray-700">{analysis?.visualization.shouldVisualize ? 'Generated' : 'N/A'}</span>
-                                            </div>
-                                            {item.tags && item.tags.length > 0 && (
-                                                <>
-                                                    <Separator />
-                                                    <div>
-                                                        <h4 className="text-gray-500 mb-3">Tags</h4>
-                                                        <div className="flex flex-wrap gap-2">
-                                                            {item.tags.map((tag) => (
-                                                                <Badge key={tag} variant="secondary">{tag}</Badge>
-                                                            ))}
-                                                        </div>
-                                                    </div>
-                                                </>
-                                            )}
-                                        </div>
                                     </div>
-
-                                    <div className="bg-white rounded-xl border border-gray-200/80 shadow-sm">
-                                        <div className="p-5 border-b border-gray-200/80">
-                                            <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2.5"><Tag className="w-5 h-5 text-gray-500" /> Actions</h3>
+                                    {item.images && item.images.length > 0 && (
+                                       <div className="mt-6 grid grid-cols-2 gap-4">
+                                           {item.images.map((image, index) => (
+                                               <img key={index} src={`data:${image.mimeType};base64,${image.data}`} alt={`Uploaded content ${index + 1}`} className="rounded-lg" />
+                                           ))}
+                                       </div>
+                                    )}
+                                </Section>
+                            </div>
+                        </div>
+                        <div className="col-span-12 lg:col-span-4">
+                            <div className="sticky top-24 space-y-6">
+                                <div className="bg-black/10 rounded-xl border border-white/10 h-full">
+                                    <div className="p-5 border-b border-white/10">
+                                        <h3 className="text-lg font-semibold flex items-center gap-2.5"><Info className="w-5 h-5" /> Details</h3>
+                                    </div>
+                                    <div className="p-5 space-y-4 text-base">
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-muted-foreground">Type</span>
+                                            <span className="font-medium capitalize">{item.type}</span>
                                         </div>
-                                        <div className="p-5 grid grid-cols-2 gap-3">
-                                            <Button variant="outline" className="w-full">
-                                                <Share2 className="w-4 h-4 mr-2" /> Share
-                                            </Button>
-                                            <Button variant="outline" className="w-full" onClick={() => id && toggleFavorite(id)}>
-                                                <Heart className={cn("w-4 h-4 mr-2", item?.isFavorite && "fill-red-500 text-red-500")} /> Favorite
-                                            </Button>
-                                            <Button variant="destructive" className="w-full col-span-2" onClick={() => {
-                                                if (id) {
-                                                    deleteContent(id);
-                                                    navigate("/library");
-                                                }
-                                            }}>
-                                                <Trash2 className="w-4 h-4 mr-2" /> Delete
-                                            </Button>
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-muted-foreground">Category</span>
+                                            <Badge variant="secondary">{item.category}</Badge>
                                         </div>
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-muted-foreground">Created</span>
+                                            <span className="font-medium">{new Date(item.createdAt).toLocaleDateString()}</span>
+                                        </div>
+                                        <Separator />
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-muted-foreground">AI Status</span>
+                                            <span className="font-medium flex items-center gap-1.5">
+                                                {analysis ? (
+                                                    <>
+                                                        <CheckCircle2 className="w-4 h-4 text-green-400" />
+                                                        Completed
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <Loader2 className="w-4 h-4 text-amber-400 animate-spin" />
+                                                        Processing
+                                                    </>
+                                                )}
+                                            </span>
+                                        </div>
+                                        {item.tags && item.tags.length > 0 && (
+                                            <>
+                                                <Separator />
+                                                <div>
+                                                    <h4 className="text-muted-foreground mb-3">Tags</h4>
+                                                    <div className="flex flex-wrap gap-2">
+                                                        {item.tags.map((tag) => (
+                                                            <Badge key={tag} variant="secondary">{tag}</Badge>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            </>
+                                        )}
                                     </div>
                                 </div>
                             </div>
